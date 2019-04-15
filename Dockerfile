@@ -1,8 +1,15 @@
-FROM debian
-MAINTAINER Neil Chambers <n3llyb0y.uk@gmail.com>
+FROM pangpanglabs/golang:builder AS builder
 
-RUN apt-get update && apt-get install -y netcat
+WORKDIR /go/src/wait
+COPY . .
+# disable cgo
+ENV CGO_ENABLED=0
 
-ADD wait /wait
+# make application docker image use alpine
+FROM pangpanglabs/alpine-ssl
+WORKDIR /go/src/wait
 
-CMD ["/wait"]
+# copy execute file to image
+COPY --from=builder /go/src/wait ./
+
+CMD ["./wait"]
